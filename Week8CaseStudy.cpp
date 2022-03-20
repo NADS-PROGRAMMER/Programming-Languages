@@ -1,5 +1,7 @@
 #include <iostream>
 # include <vector>
+#include <map>
+#include <typeinfo>
 using namespace std;
 
 struct Deck {
@@ -28,23 +30,26 @@ string Choices() {
 }
 
 
+/** This function is for Card only. */
 void SetRarityAndPrice(Card &card, string rarity, double price) {
 	card.rarity = rarity;
 	card.price = price;
 }
+
+
 /**
 	A function that adds a deck to the specified @param list.
 	
 	@param list
 	- A list that holds all of the added products. 
 */
-void AddDeck(vector<Deck> &decksList) {
+void AddDeck(map<string, Deck> &decksList) {
 	
 	struct Deck deck;
 	string isMeta = "";
 	
 	cout << "\nDeck Name: ";
-	cin >> deck.productName;
+	getline(cin.ignore(), deck.productName);
 	
 	cout << "\nProduct ID: ";
 	cin >> deck.productID;
@@ -54,55 +59,56 @@ void AddDeck(vector<Deck> &decksList) {
 	
 	if (isMeta == "Y") {
 		deck.isMeta = true;
-		deck.price = 800 * (30 / 100);
+		double additional = 800 * (double) (30.0 / 100);
+		deck.price = 800  + additional;
 	}
 	
-	decksList.push_back(deck);
+	decksList[deck.productID] = deck;
 }
 
 
+void AddCard(map<string, Card> &cardsList) {
 
-void AddCard(vector<Card> &cardsList) {
-	
 	struct Card card;
-	
-	string isMeta = ""; 
+	char isMeta = '\n';
 	char rarity = '\n';
 	
-	cout << "\nCard Name: ";
-	cin >> card.cardName;
+	cout << "\nCard Name: "	;
+	getline(cin.ignore(), card.cardName);
 	
-	cout << "\nID: ";
+	cout << "\Card ID: ";
 	cin >> card.id;
 	
-	cout << "\nRarity: (C = Common, R = Rare, P = Promotional): ";
+	cout << "\nRarity: [C - Common, R- Rare, P - Promotional]: ";
 	cin >> rarity;
 	
-	switch(rarity) {
+	switch (rarity) {
 		
-		case 'C': {
-			SetRarityAndPrice(card, "Common", 50 * (50 / 100));
-			break;
-		}
-		case 'R': {
-			SetRarityAndPrice(card, "Rare", 100 * (100 / 100));
-			break;
-		}
-		case 'P': {
-			SetRarityAndPrice(card, "Promotional", 100 * (100 / 100));
-			break;
-		}
+		case 'C':
+			SetRarityAndPrice(card, "Common", 50.0); break;
+		case 'R':
+			SetRarityAndPrice(card, "Rare", 100.0); break;
+		default:
+			SetRarityAndPrice(card, "Promotional", 200.0); break;
 	}
 	
-	cardsList.push_back(card);	
-} 
+	cout << "\nIs Meta? [Y/N]: ";
+	cin >> isMeta;
+	
+	if (isMeta == 'Y') {
+		card.isMeta = true;
+		double additional = card.price * (double) (50.0 / 100);
+		card.price = card.price  + additional;
+	}
+	
+	cardsList[card.id] = card;
+}
 
-
-void AddProducts(vector<Deck> &decksList, vector<Card> &cardsList) {
+void AddProducts(map<string, Deck> &decksList, map<string, Card> &cardsList) {
 	
 	char addingChoice = '\n';
 	
-	cout << "\n1.) Add Deck\n2.) Add Card\n";
+	cout << "\n1.) Add Deck\n2.) Add Card\nChoose: ";
 	cin >> addingChoice;
 	
 	switch (addingChoice) {
@@ -117,11 +123,12 @@ void AddProducts(vector<Deck> &decksList, vector<Card> &cardsList) {
 	}
 }
 
+
 /** MAIN */
 int main() {
-	  
-	vector<Deck> decksList;
-	vector<Card> cardsList;
+	
+	map<string, Deck> decksList;
+	map<string, Card> cardsList;
 	
 	bool exit = false;
 	char choice = '\n';
@@ -148,16 +155,12 @@ int main() {
 				exit = true;
 		}
 		
-		// For testing only
-		cout << "\nDECKS: " << endl;
-		for (Deck deck : decksList) {
-			cout << deck.productName << endl;
+		for (auto itr = decksList.begin(); itr != decksList.end(); ++itr) {
+			cout << (*itr).first + " " + (*itr).second.productName + " " + to_string((*itr).second.price) << endl;
 		}
 		
-		// For testing only
-		cout << "\nCARDS: " << endl;
-		for (Card card : cardsList) {
-			cout << card.cardName << endl;
+		for (auto itr = cardsList.begin(); itr != cardsList.end(); ++itr) {
+			cout << (*itr).first + " " + (*itr).second.cardName + " " + to_string((*itr).second.price) << endl;
 		}
 	}
 	return 0;
